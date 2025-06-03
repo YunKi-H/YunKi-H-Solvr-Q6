@@ -25,7 +25,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
-import { format, subDays } from 'date-fns'
+import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
@@ -71,7 +71,7 @@ export default function SleepAnalytics() {
     try {
       const response = await api.get('/sleep-records/analysis')
       setAnalysis(response.data.analysis)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('수면 패턴 분석을 불러오는데 실패했습니다:', error)
       setError('수면 패턴 분석을 불러오는데 실패했습니다.')
     } finally {
@@ -147,19 +147,20 @@ export default function SleepAnalytics() {
         
         console.log('최종 차트 데이터:', formattedData)
         setChartData(formattedData)
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('수면 기록을 불러오는데 실패했습니다:', error)
-        if (error.response) {
-          console.error('에러 응답:', error.response.data)
-          console.error('에러 상태:', error.response.status)
+        if (error instanceof Error && 'response' in error) {
+          const err = error as { response?: { data?: unknown; status?: number } }
+          console.error('에러 응답:', err.response?.data)
+          console.error('에러 상태:', err.response?.status)
         }
       }
     }
 
     console.log('현재 사용자:', user)
     if (user) {
-      fetchRecords()
-      fetchAnalysis()
+      void fetchRecords()
+      void fetchAnalysis()
     } else {
       console.log('사용자가 로그인되어 있지 않습니다')
     }
