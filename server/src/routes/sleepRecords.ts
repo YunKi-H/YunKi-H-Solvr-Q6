@@ -6,7 +6,7 @@ const createSleepRecordSchema = z.object({
   date: z.string(),
   sleepTime: z.string(),
   wakeTime: z.string(),
-  notes: z.string().optional()
+  notes: z.string().nullable()
 })
 
 const updateSleepRecordSchema = createSleepRecordSchema.partial()

@@ -3,7 +3,6 @@ import {
   Box,
   TextField,
   Button,
-  Grid,
   useTheme,
   useMediaQuery
 } from '@mui/material'
@@ -17,7 +16,7 @@ interface SleepRecordFormData {
   date: string
   sleepTime: string
   wakeTime: string
-  notes?: string
+  notes: string | null
 }
 
 interface Props {
@@ -46,15 +45,15 @@ export default function SleepRecordForm({ onSubmit, onCancel, initialData }: Pro
       date: date.toISOString().split('T')[0],
       sleepTime: sleepTime.toTimeString().slice(0, 5),
       wakeTime: wakeTime.toTimeString().slice(0, 5),
-      notes: notes || undefined
+      notes: notes || null
     })
   }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ko}>
       <Box component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box>
             <DatePicker
               label="날짜"
               value={date}
@@ -66,34 +65,36 @@ export default function SleepRecordForm({ onSubmit, onCancel, initialData }: Pro
                 }
               }}
             />
-          </Grid>
-          <Grid item xs={6}>
-            <TimePicker
-              label="취침 시간"
-              value={sleepTime}
-              onChange={(newValue) => setSleepTime(newValue)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  size: isMobile ? "small" : "medium"
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TimePicker
-              label="기상 시간"
-              value={wakeTime}
-              onChange={(newValue) => setWakeTime(newValue)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  size: isMobile ? "small" : "medium"
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <TimePicker
+                label="취침 시간"
+                value={sleepTime}
+                onChange={(newValue) => setSleepTime(newValue)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: isMobile ? "small" : "medium"
+                  }
+                }}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <TimePicker
+                label="기상 시간"
+                value={wakeTime}
+                onChange={(newValue) => setWakeTime(newValue)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: isMobile ? "small" : "medium"
+                  }
+                }}
+              />
+            </Box>
+          </Box>
+          <Box>
             <TextField
               label="특이사항"
               value={notes}
@@ -103,26 +104,24 @@ export default function SleepRecordForm({ onSubmit, onCancel, initialData }: Pro
               rows={2}
               size={isMobile ? "small" : "medium"}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-              <Button
-                type="button"
-                onClick={onCancel}
-                size={isMobile ? "small" : "medium"}
-              >
-                취소
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                size={isMobile ? "small" : "medium"}
-              >
-                저장
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            <Button
+              type="button"
+              onClick={onCancel}
+              size={isMobile ? "small" : "medium"}
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              size={isMobile ? "small" : "medium"}
+            >
+              저장
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </LocalizationProvider>
   )

@@ -115,7 +115,12 @@ export default function SleepTracker() {
                 setShowForm(false)
                 setEditingRecord(null)
               }}
-              initialData={editingRecord}
+              initialData={editingRecord ? {
+                date: editingRecord.date,
+                sleepTime: editingRecord.sleepTime,
+                wakeTime: editingRecord.wakeTime,
+                notes: editingRecord.notes
+              } : undefined}
             />
           </CardContent>
         </Card>

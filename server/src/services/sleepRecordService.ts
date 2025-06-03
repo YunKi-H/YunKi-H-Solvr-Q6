@@ -1,6 +1,6 @@
 import { getDb } from '../db'
 import { sleepRecords } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 
 export interface SleepRecord {
   id: number
@@ -18,14 +18,14 @@ export interface CreateSleepRecordInput {
   date: string
   sleepTime: string
   wakeTime: string
-  notes?: string
+  notes: string | null
 }
 
 export interface UpdateSleepRecordInput {
   date?: string
   sleepTime?: string
   wakeTime?: string
-  notes?: string
+  notes?: string | null
 }
 
 export class SleepRecordService {
@@ -49,8 +49,10 @@ export class SleepRecordService {
         ...input,
         updatedAt: new Date().toISOString()
       })
-      .where(eq(sleepRecords.id, id))
-      .where(eq(sleepRecords.userId, userId))
+      .where(and(
+        eq(sleepRecords.id, id),
+        eq(sleepRecords.userId, userId)
+      ))
       .returning()
     return record || null
   }
@@ -58,8 +60,10 @@ export class SleepRecordService {
   async deleteRecord(id: number, userId: number): Promise<boolean> {
     const db = await getDb()
     const [record] = await db.delete(sleepRecords)
-      .where(eq(sleepRecords.id, id))
-      .where(eq(sleepRecords.userId, userId))
+      .where(and(
+        eq(sleepRecords.id, id),
+        eq(sleepRecords.userId, userId)
+      ))
       .returning()
     return !!record
   }
