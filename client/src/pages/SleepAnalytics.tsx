@@ -12,7 +12,8 @@ import {
   MenuItem,
   SelectChangeEvent,
   Button,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material'
 import {
   LineChart,
@@ -28,6 +29,7 @@ import { format, subDays } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
+import ReactMarkdown from 'react-markdown'
 
 interface SleepRecord {
   id: number
@@ -55,6 +57,8 @@ export default function SleepAnalytics() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [analysis, setAnalysis] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
     setPeriod(event.target.value)
@@ -62,13 +66,17 @@ export default function SleepAnalytics() {
 
   const fetchAnalysis = async () => {
     setIsAnalyzing(true)
+    setIsLoading(true)
+    setError(null)
     try {
       const response = await api.get('/sleep-records/analysis')
       setAnalysis(response.data.analysis)
-    } catch (error) {
+    } catch (error: any) {
       console.error('수면 패턴 분석을 불러오는데 실패했습니다:', error)
+      setError('수면 패턴 분석을 불러오는데 실패했습니다.')
     } finally {
       setIsAnalyzing(false)
+      setIsLoading(false)
     }
   }
 
@@ -304,16 +312,18 @@ export default function SleepAnalytics() {
             <CircularProgress />
           </Box>
         ) : analysis ? (
-          <Typography
-            component="div"
-            sx={{
-              whiteSpace: 'pre-wrap',
+          <Paper sx={{ p: 3, mt: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              AI 수면 분석
+            </Typography>
+            <Box sx={{ 
               '& p': { mb: 2 },
-              '& ul': { pl: 3, mb: 2 }
-            }}
-          >
-            {analysis}
-          </Typography>
+              '& ul': { pl: 3 },
+              '& li': { mb: 1 }
+            }}>
+              <ReactMarkdown>{analysis}</ReactMarkdown>
+            </Box>
+          </Paper>
         ) : (
           <Typography color="text.secondary" align="center">
             분석 결과가 없습니다.
