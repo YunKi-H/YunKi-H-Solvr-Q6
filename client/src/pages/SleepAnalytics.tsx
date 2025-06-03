@@ -10,7 +10,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Button,
+  CircularProgress
 } from '@mui/material'
 import {
   LineChart,
@@ -51,9 +53,23 @@ export default function SleepAnalytics() {
   const { user } = useAuth()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const [analysis, setAnalysis] = useState<string>('')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
     setPeriod(event.target.value)
+  }
+
+  const fetchAnalysis = async () => {
+    setIsAnalyzing(true)
+    try {
+      const response = await api.get('/sleep-records/analysis')
+      setAnalysis(response.data.analysis)
+    } catch (error) {
+      console.error('수면 패턴 분석을 불러오는데 실패했습니다:', error)
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   useEffect(() => {
@@ -135,6 +151,7 @@ export default function SleepAnalytics() {
     console.log('현재 사용자:', user)
     if (user) {
       fetchRecords()
+      fetchAnalysis()
     } else {
       console.log('사용자가 로그인되어 있지 않습니다')
     }
@@ -266,6 +283,42 @@ export default function SleepAnalytics() {
             </Typography>
           </Box>
         ))}
+      </Paper>
+
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">
+            AI 수면 패턴 분석
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={fetchAnalysis}
+            disabled={isAnalyzing}
+            startIcon={isAnalyzing ? <CircularProgress size={20} /> : null}
+          >
+            분석 새로고침
+          </Button>
+        </Box>
+        {isAnalyzing ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : analysis ? (
+          <Typography
+            component="div"
+            sx={{
+              whiteSpace: 'pre-wrap',
+              '& p': { mb: 2 },
+              '& ul': { pl: 3, mb: 2 }
+            }}
+          >
+            {analysis}
+          </Typography>
+        ) : (
+          <Typography color="text.secondary" align="center">
+            분석 결과가 없습니다.
+          </Typography>
+        )}
       </Paper>
     </Container>
   )

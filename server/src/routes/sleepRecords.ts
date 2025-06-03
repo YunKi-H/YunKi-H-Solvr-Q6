@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { AppContext } from '../types/context'
+import { AppContext } from '../types/context.js'
+import { AIAnalysisService } from '../services/aiAnalysisService.js'
 
 const createSleepRecordSchema = z.object({
   date: z.string(),
@@ -69,6 +70,20 @@ export function createSleepRecordRoutes(context: AppContext) {
       }
       
       return { success: true }
+    })
+
+    // AI 분석 엔드포인트 추가
+    fastify.get('/analysis', async (request, reply) => {
+      try {
+        const userId = request.user.id
+        const records = await context.sleepRecordService.getRecordsByUserId(userId)
+        const aiAnalysis = new AIAnalysisService()
+        const analysis = await aiAnalysis.analyzeSleepPattern(records)
+        return { analysis }
+      } catch (error) {
+        console.error('수면 패턴 분석 중 오류 발생:', error)
+        reply.status(500).send({ error: '수면 패턴 분석에 실패했습니다.' })
+      }
     })
   }
 } 
