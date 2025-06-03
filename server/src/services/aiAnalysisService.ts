@@ -31,47 +31,32 @@ export class AIAnalysisService {
     }))
 
     const prompt = `
-다음은 사용자의 수면 기록 데이터입니다. 이 데이터를 분석하여 수면 패턴에 대한 인사이트와 개선을 위한 조언을 제공해주세요.
-데이터는 JSON 형식으로 제공되며, 각 기록은 날짜, 취침 시간, 기상 시간, 수면 시간(시간 단위), 그리고 특이사항을 포함합니다.
+수면 기록 데이터를 분석해주세요:
 
-수면 데이터:
 ${JSON.stringify(sleepData, null, 2)}
 
-다음과 같은 관점에서 분석해주세요:
-1. 전반적인 수면 패턴 (취침/기상 시간의 일관성)
+다음 항목에 대해 간단히 분석해주세요:
+1. 수면 패턴의 일관성
 2. 수면 시간의 충분성
-3. 수면의 질에 영향을 줄 수 있는 요인
-4. 개선을 위한 구체적인 제안
+3. 개선 제안
 
-분석은 한국어로 작성해주세요.`
+답변은 500자 이내로 간단히 작성해주세요.`
 
-    try {
-      const result = await model.generateContentStream({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 4096,
-        },
-      })
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      },
+    })
 
-      let fullResponse = ''
-      for await (const chunk of result.stream) {
-        if (chunk.text) {
-          fullResponse += chunk.text
-        }
-      }
-
-      if (!fullResponse) {
-        throw new Error('AI 응답이 올바르지 않습니다.')
-      }
-
-      return fullResponse
-    } catch (error) {
-      console.error('AI 분석 중 오류 발생:', error)
-      throw new Error('수면 패턴 분석에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    if (!result || !result.response) {
+      throw new Error('AI 응답이 올바르지 않습니다.')
     }
+
+    return result.response.text()
   }
 
   private calculateDuration(sleepTime: string, wakeTime: string): number {
