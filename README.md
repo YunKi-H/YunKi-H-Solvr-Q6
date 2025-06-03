@@ -1,30 +1,19 @@
-# 풀스택 서비스 보일러 플레이트
+# 수면 기록 관리 서비스
 
 ## 프로젝트 개요
+이 프로젝트는 개인의 수면 패턴을 추적하고 관리할 수 있는 웹 애플리케이션입니다. 사용자는 매일의 취침 시간, 기상 시간, 수면의 질 등을 기록하고 분석할 수 있습니다.
 
-이 보일러 플레이트는 풀스택 웹 애플리케이션 개발을 위한 기본 구조를 제공합니다. monorepo 구조로 클라이언트와 서버를 효율적으로 관리하며, 현대적인 웹 개발 기술 스택을 활용합니다.
+### 주요 기능
+- 일별 수면 기록 작성 및 관리
+- 취침/기상 시간 추적
+- 수면 관련 특이사항 메모
+- 모바일 환경 지원
 
-## 기술 스택
-
-### 공통
-
-- 패키지 매니저: pnpm (workspace 기능 활용)
-- 언어: TypeScript
-- Node.js 버전: 22.x
-- 테스트: Vitest
-- 코드 품질: Prettier
-
-### 클라이언트
-
-- 프레임워크: React
-- 빌드 도구: Vite
-- 라우팅: React Router
-- 스타일링: TailwindCSS
-
-### 서버
-
-- 프레임워크: Fastify
-- 데이터베이스: SQLite with DirzzleORM
+### 기술 스택
+- Frontend: React, TypeScript, Material-UI, Tailwind CSS
+- Backend: Node.js, Fastify, TypeScript
+- Database: SQLite (Drizzle ORM)
+- Authentication: JWT
 
 ## 설치 및 실행
 
@@ -75,11 +64,13 @@ pnpm build
 
 ## API 엔드포인트
 
-서버는 다음과 같은 기본 API 엔드포인트를 제공합니다:
+서버는 다음과 같은 API 엔드포인트를 제공합니다:
 
+### 수면 기록 관리
+- `GET /api/sleep-records`: 사용자의 수면 기록 목록 조회
+- `POST /api/sleep-records`: 새로운 수면 기록 생성
+- `PUT /api/sleep-records/:id`: 특정 수면 기록 수정
+- `DELETE /api/sleep-records/:id`: 특정 수면 기록 삭제
+
+### 상태 확인
 - `GET /api/health`: 서버 상태 확인
-- `GET /api/users`: 유저 목록 조회
-- `GET /api/users/:id`: 특정 유저 조회
-- `POST /api/users`: 새 유저 추가
-- `PUT /api/users/:id`: 유저 정보 수정
-- `DELETE /api/users/:id`: 유저 삭제
