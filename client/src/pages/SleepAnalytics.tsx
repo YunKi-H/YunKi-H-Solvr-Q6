@@ -5,7 +5,12 @@ import {
   Typography,
   Box,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent
 } from '@mui/material'
 import {
   LineChart,
@@ -42,9 +47,14 @@ interface ChartData {
 export default function SleepAnalytics() {
   const [records, setRecords] = useState<SleepRecord[]>([])
   const [chartData, setChartData] = useState<ChartData[]>([])
+  const [period, setPeriod] = useState('7') // 기본값 7일
   const { user } = useAuth()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const handlePeriodChange = (event: SelectChangeEvent) => {
+    setPeriod(event.target.value)
+  }
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -74,9 +84,9 @@ export default function SleepAnalytics() {
           new Date(a.date).getTime() - new Date(b.date).getTime()
         )
         
-        // 최근 7일 데이터만 사용
-        const recentRecords = sortedRecords.slice(-7)
-        console.log('최근 7일 데이터:', recentRecords)
+        // 선택된 기간만큼의 최근 데이터 사용
+        const recentRecords = sortedRecords.slice(-Number(period))
+        console.log(`최근 ${period}일 데이터:`, recentRecords)
         
         const formattedData = recentRecords.map((record: SleepRecord) => {
           console.log('기록 처리 중:', record)
@@ -128,13 +138,29 @@ export default function SleepAnalytics() {
     } else {
       console.log('사용자가 로그인되어 있지 않습니다')
     }
-  }, [user])
+  }, [user, period]) // period가 변경될 때도 데이터를 다시 불러옴
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        수면 분석
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1">
+          수면 분석
+        </Typography>
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel id="period-select-label">기간</InputLabel>
+          <Select
+            labelId="period-select-label"
+            value={period}
+            label="기간"
+            onChange={handlePeriodChange}
+          >
+            <MenuItem value="7">7일</MenuItem>
+            <MenuItem value="14">14일</MenuItem>
+            <MenuItem value="30">30일</MenuItem>
+            <MenuItem value="90">90일</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
       
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
