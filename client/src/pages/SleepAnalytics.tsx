@@ -33,8 +33,10 @@ interface SleepRecord {
 interface ChartData {
   date: string
   sleepDuration: number
-  sleepTime: string
-  wakeTime: string
+  sleepTime: number
+  wakeTime: number
+  sleepTimeDisplay: string
+  wakeTimeDisplay: string
 }
 
 export default function SleepAnalytics() {
@@ -90,8 +92,10 @@ export default function SleepAnalytics() {
           const formattedRecord = {
             date: format(new Date(record.date), 'MM/dd', { locale: ko }),
             sleepDuration: Number(duration.toFixed(1)),
-            sleepTime: record.sleepTime,
-            wakeTime: record.wakeTime
+            sleepTime: Number(record.sleepTime.split(':')[0]) + Number(record.sleepTime.split(':')[1]) / 60,
+            wakeTime: Number(record.wakeTime.split(':')[0]) + Number(record.wakeTime.split(':')[1]) / 60,
+            sleepTimeDisplay: record.sleepTime,
+            wakeTimeDisplay: record.wakeTime
           }
           console.log('변환된 데이터:', formattedRecord)
           return formattedRecord
@@ -152,6 +156,44 @@ export default function SleepAnalytics() {
         </Box>
       </Paper>
 
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          취침/기상 시간 패턴
+        </Typography>
+        <Box sx={{ height: isMobile ? 300 : 400 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis
+                label={{ value: '시간', angle: -90, position: 'insideLeft' }}
+                domain={[0, 24]}
+                tickFormatter={(value) => `${value}시`}
+              />
+              <Tooltip
+                formatter={(value: string) => [`${value}`, '']}
+                labelFormatter={(label) => `${label}`}
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="sleepTime"
+                name="취침 시간"
+                stroke={theme.palette.primary.main}
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="wakeTime"
+                name="기상 시간"
+                stroke={theme.palette.secondary.main}
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Box>
+      </Paper>
+
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           최근 수면 기록
@@ -160,7 +202,7 @@ export default function SleepAnalytics() {
           <Box key={index} sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
             <Typography variant="subtitle1">{data.date}</Typography>
             <Typography variant="body2" color="text.secondary">
-              취침: {data.sleepTime} | 기상: {data.wakeTime}
+              취침: {data.sleepTimeDisplay} | 기상: {data.wakeTimeDisplay}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               수면 시간: {data.sleepDuration}시간
