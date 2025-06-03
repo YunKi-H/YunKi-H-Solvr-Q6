@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material'
 import MainLayout from './layouts/MainLayout'
-import HomePage from './routes/HomePage'
 import UsersPage from './routes/UsersPage'
 import SleepTracker from './pages/SleepTracker'
 
