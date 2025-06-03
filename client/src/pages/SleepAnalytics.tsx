@@ -89,10 +89,20 @@ export default function SleepAnalytics() {
           }
           
           const duration = (wakeDate.getTime() - sleepDate.getTime()) / (1000 * 60 * 60)
+          
+          // 취침 시간을 24시간 형식으로 변환
+          let sleepHour = Number(record.sleepTime.split(':')[0])
+          const sleepMinute = Number(record.sleepTime.split(':')[1])
+          
+          // 취침 시간이 0시~6시 사이인 경우 24시간을 더해서 표시
+          if (sleepHour < 6) {
+            sleepHour += 24
+          }
+          
           const formattedRecord = {
             date: format(new Date(record.date), 'MM/dd', { locale: ko }),
             sleepDuration: Number(duration.toFixed(1)),
-            sleepTime: Number(record.sleepTime.split(':')[0]) + Number(record.sleepTime.split(':')[1]) / 60,
+            sleepTime: sleepHour + sleepMinute / 60,
             wakeTime: Number(record.wakeTime.split(':')[0]) + Number(record.wakeTime.split(':')[1]) / 60,
             sleepTimeDisplay: record.sleepTime,
             wakeTimeDisplay: record.wakeTime
@@ -166,16 +176,36 @@ export default function SleepAnalytics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis
-                label={{ value: '시간', angle: -90, position: 'insideLeft' }}
-                domain={[0, 24]}
+                yAxisId="sleep"
+                orientation="left"
+                label={{ value: '취침 시간', angle: -90, position: 'insideLeft' }}
+                domain={[18, 30]}
+                tickFormatter={(value) => {
+                  if (value >= 24) {
+                    return `${value - 24}시`
+                  }
+                  return `${value}시`
+                }}
+              />
+              <YAxis
+                yAxisId="wake"
+                orientation="right"
+                label={{ value: '기상 시간', angle: 90, position: 'insideRight' }}
+                domain={[0, 12]}
                 tickFormatter={(value) => `${value}시`}
               />
               <Tooltip
-                formatter={(value: string) => [`${value}`, '']}
+                formatter={(value: number, name: string) => {
+                  const hour = Math.floor(value)
+                  const minute = Math.round((value - hour) * 60)
+                  const displayHour = hour >= 24 ? hour - 24 : hour
+                  return [`${displayHour}시 ${minute}분`, name === 'sleepTime' ? '취침 시간' : '기상 시간']
+                }}
                 labelFormatter={(label) => `${label}`}
               />
               <Legend />
               <Line
+                yAxisId="sleep"
                 type="monotone"
                 dataKey="sleepTime"
                 name="취침 시간"
@@ -183,6 +213,7 @@ export default function SleepAnalytics() {
                 strokeWidth={2}
               />
               <Line
+                yAxisId="wake"
                 type="monotone"
                 dataKey="wakeTime"
                 name="기상 시간"
